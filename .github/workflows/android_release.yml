@@ -45,6 +45,28 @@ jobs:
       run: |
         echo "$KEYSTORE_BASE64" | base64 --decode > release.keystore
 
+    - name: Download Model Assets
+      run: |
+        mkdir -p assets/parakeet-tdt-0.6b-v3-int8
+        cd assets/parakeet-tdt-0.6b-v3-int8
+        
+        echo "Downloading encoder-model.int8.onnx..."
+        curl -L -o encoder-model.int8.onnx "https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx/resolve/main/encoder-model.int8.onnx?download=true"
+        
+        echo "Downloading decoder_joint-model.int8.onnx..."
+        curl -L -o decoder_joint-model.int8.onnx "https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx/resolve/main/decoder_joint-model.int8.onnx?download=true"
+        
+        echo "Downloading nemo128.onnx..."
+        curl -L -o nemo128.onnx "https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx/resolve/main/nemo128.onnx?download=true"
+        
+        echo "Verifying checksums..."
+        echo "6139d2fa7e1b086097b277c7149725edbab89cc7c7ae64b23c741be4055aff09  encoder-model.int8.onnx" > checksums.txt
+        echo "eea7483ee3d1a30375daedc8ed83e3960c91b098812127a0d99d1c8977667a70  decoder_joint-model.int8.onnx" >> checksums.txt
+        echo "a9fde1486ebfcc08f328d75ad4610c67835fea58c73ba57e3209a6f6cf019e9f  nemo128.onnx" >> checksums.txt
+        
+        sha256sum -c checksums.txt
+        rm checksums.txt
+
     - name: Build APK
       env:
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
