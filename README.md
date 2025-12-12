@@ -1,8 +1,14 @@
 # Offline Voice Input (Android)
 
-[![Download APK](https://img.shields.io/badge/Download-Latest%20APK-blue?style=for-the-badge&logo=android)](https://github.com/notune/android_transcribe_app/releases/latest)
-
 An offline, privacy-focused voice input keyboard and live subtitle tool for Android, built with Rust.
+
+
+[<img src="https://i.ibb.co/q0mdc4Z/get-it-on-github.png"
+alt="Get it on GitHub"
+height="80">](https://github.com/notune/android_transcribe_app/releases/latest)
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
+alt="Get it on Google Play"
+height="80">](https://play.google.com/store/apps/details?id=dev.notune.transcribe)
 
 ## Features
 
