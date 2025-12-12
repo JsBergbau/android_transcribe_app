@@ -137,11 +137,12 @@ export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/android-ndk-r28
 
 ## Acknowledgments
 
-- **Speech Model:** [Parakeet TDT 0.6b v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3) by NVIDIA.
-  - Licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-  - *Note: This application uses a quantized (int8) version of the original model.*
+  - **Speech Model:** [Parakeet TDT 0.6b v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3) by NVIDIA.
 
-- **Inference Backend:** [transcribe-rs](https://github.com/cjpais/transcribe-rs) by CJ Pais.
+      - ONNX quantization provided by [istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx).
+      - Licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+  - **Inference Backend:** [transcribe-rs](https://github.com/cjpais/transcribe-rs) by CJ Pais.
 
 ## License of this Project
 
