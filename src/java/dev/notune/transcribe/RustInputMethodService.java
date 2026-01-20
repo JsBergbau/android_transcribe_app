@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.content.Context;
+import android.view.MotionEvent;
 
 public class RustInputMethodService extends InputMethodService {
     
@@ -31,9 +32,15 @@ public class RustInputMethodService extends InputMethodService {
     private View recordContainer;
     private android.widget.ImageView micIcon;
     private ProgressBar progressBar;
+    private View backspaceButton;
     private Handler mainHandler;
     private boolean isRecording = false;
     private String lastStatus = "Initializing...";
+
+    // Key repeat settings
+    private static final long REPEAT_INITIAL_DELAY = 400; // ms before repeat starts
+    private static final long REPEAT_INTERVAL = 50; // ms between repeats
+    private Runnable backspaceRepeatRunnable;
 
     @Override
     public void onCreate() {
@@ -58,7 +65,38 @@ public class RustInputMethodService extends InputMethodService {
             recordContainer = view.findViewById(R.id.ime_record_container);
             micIcon = view.findViewById(R.id.ime_mic_icon);
             hintView = view.findViewById(R.id.ime_hint);
-            
+            backspaceButton = view.findViewById(R.id.ime_backspace);
+
+            // Key repeat runnable
+            backspaceRepeatRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (getCurrentInputConnection() != null) {
+                        getCurrentInputConnection().deleteSurroundingText(1, 0);
+                    }
+                    mainHandler.postDelayed(this, REPEAT_INTERVAL);
+                }
+            };
+
+            backspaceButton.setOnTouchListener((v, event) -> {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        // Delete one character immediately
+                        if (getCurrentInputConnection() != null) {
+                            getCurrentInputConnection().deleteSurroundingText(1, 0);
+                        }
+                        // Schedule repeat after initial delay
+                        mainHandler.postDelayed(backspaceRepeatRunnable, REPEAT_INITIAL_DELAY);
+                        return true;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        // Stop repeating
+                        mainHandler.removeCallbacks(backspaceRepeatRunnable);
+                        return true;
+                }
+                return false;
+            });
+
             recordContainer.setOnClickListener(v -> {
                 if (!recordContainer.isEnabled()) return;
                 
