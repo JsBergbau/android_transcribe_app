@@ -2,6 +2,7 @@ package dev.notune.transcribe;
 
 import android.inputmethodservice.InputMethodService;
 import android.view.View;
+import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -76,8 +77,9 @@ public class RustInputMethodService extends InputMethodService {
             backspaceRepeatRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    if (getCurrentInputConnection() != null) {
-                        getCurrentInputConnection().deleteSurroundingText(1, 0);
+                    InputConnection ic = getCurrentInputConnection();
+                    if (ic != null) {
+                        ic.deleteSurroundingText(1, 0);
                     }
                     mainHandler.postDelayed(this, REPEAT_INTERVAL);
                 }
@@ -87,8 +89,9 @@ public class RustInputMethodService extends InputMethodService {
             spaceRepeatRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    if (getCurrentInputConnection() != null) {
-                        getCurrentInputConnection().commitText(" ", 1);
+                    InputConnection ic = getCurrentInputConnection();
+                    if (ic != null) {
+                        ic.commitText(" ", 1);
                     }
                     mainHandler.postDelayed(this, REPEAT_INTERVAL);
                 }
@@ -97,16 +100,14 @@ public class RustInputMethodService extends InputMethodService {
             backspaceButton.setOnTouchListener((v, event) -> {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        // Delete one character immediately
-                        if (getCurrentInputConnection() != null) {
-                            getCurrentInputConnection().deleteSurroundingText(1, 0);
+                        InputConnection ic = getCurrentInputConnection();
+                        if (ic != null) {
+                            ic.deleteSurroundingText(1, 0);
                         }
-                        // Schedule repeat after initial delay
                         mainHandler.postDelayed(backspaceRepeatRunnable, REPEAT_INITIAL_DELAY);
                         return true;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
-                        // Stop repeating
                         mainHandler.removeCallbacks(backspaceRepeatRunnable);
                         return true;
                 }
@@ -116,16 +117,14 @@ public class RustInputMethodService extends InputMethodService {
             spaceButton.setOnTouchListener((v, event) -> {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        // Insert space immediately
-                        if (getCurrentInputConnection() != null) {
-                            getCurrentInputConnection().commitText(" ", 1);
+                        InputConnection ic = getCurrentInputConnection();
+                        if (ic != null) {
+                            ic.commitText(" ", 1);
                         }
-                        // Schedule repeat after initial delay
                         mainHandler.postDelayed(spaceRepeatRunnable, REPEAT_INITIAL_DELAY);
                         return true;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
-                        // Stop repeating
                         mainHandler.removeCallbacks(spaceRepeatRunnable);
                         return true;
                 }
@@ -133,8 +132,25 @@ public class RustInputMethodService extends InputMethodService {
             });
 
             enterButton.setOnClickListener(v -> {
-                if (getCurrentInputConnection() != null) {
-                    getCurrentInputConnection().commitText("\n", 1);
+                InputConnection ic = getCurrentInputConnection();
+                if (ic != null) {
+                    // Get the action type (Search, Send, Done, etc.)
+                    android.view.inputmethod.EditorInfo editorInfo = getCurrentInputEditorInfo();
+                    int options = editorInfo.imeOptions;
+                    int action = options & android.view.inputmethod.EditorInfo.IME_MASK_ACTION;
+
+                    // Explicitely ommitting DONE.
+                    // Sending DONE just closes the keyboard, and in many applications if the ime_action is DONE
+                    // the correct behavior is to enter a new line. (E.g. messaging apps with enter-to-send disabled)
+                    if (action == android.view.inputmethod.EditorInfo.IME_ACTION_GO ||
+                        action == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH ||
+                        action == android.view.inputmethod.EditorInfo.IME_ACTION_SEND ||
+                        action == android.view.inputmethod.EditorInfo.IME_ACTION_NEXT) {
+                        ic.performEditorAction(action);
+                    } else {
+                        ic.sendKeyEvent(new android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_ENTER));
+                        ic.sendKeyEvent(new android.view.KeyEvent(android.view.KeyEvent.ACTION_UP, android.view.KeyEvent.KEYCODE_ENTER));
+                    }
                 }
             });
 
