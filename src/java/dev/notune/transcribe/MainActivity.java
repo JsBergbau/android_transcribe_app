@@ -12,6 +12,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.LinearLayout;
+import android.widget.Switch;
+import java.io.File;
+import java.io.IOException;
 
 public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
@@ -53,6 +56,21 @@ public class MainActivity extends Activity {
         startSubsButton.setOnClickListener(v -> {
             Intent intent = new Intent(this, LiveSubtitleActivity.class);
             startActivity(intent);
+        });
+
+        Switch autoRecordSwitch = findViewById(R.id.switch_auto_record);
+        File autoRecordFile = new File(getFilesDir(), "auto_record");
+        autoRecordSwitch.setChecked(autoRecordFile.exists());
+        autoRecordSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                try {
+                    autoRecordFile.createNewFile();
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to create auto_record file", e);
+                }
+            } else {
+                autoRecordFile.delete();
+            }
         });
 
         // Initial check

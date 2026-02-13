@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
+import java.io.File;
 
 public class RustInputMethodService extends InputMethodService {
     
@@ -42,8 +43,6 @@ public class RustInputMethodService extends InputMethodService {
     private Handler mainHandler;
     private boolean isRecording = false;
     private String lastStatus = "Initializing...";
-    private boolean autoStartOnNextShow = true;
-
     // Key repeat settings
     private static final long REPEAT_INITIAL_DELAY = 400; // ms before repeat starts
     private static final long REPEAT_INTERVAL = 50; // ms between repeats
@@ -200,25 +199,16 @@ public class RustInputMethodService extends InputMethodService {
             return errorView;
         }
     }
-    
+
     @Override
     public void onStartInputView(EditorInfo info, boolean restarting) {
         super.onStartInputView(info, restarting);
-        if (autoStartOnNextShow && !isRecording) {
-            autoStartOnNextShow = false;
+        if (!isRecording && new File(getFilesDir(), "auto_record").exists()) {
             if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO)
                     == PackageManager.PERMISSION_GRANTED) {
                 startRecording();
                 updateRecordButtonUI(true);
             }
-        }
-    }
-
-    @Override
-    public void onFinishInputView(boolean finishingInput) {
-        super.onFinishInputView(finishingInput);
-        if (finishingInput) {
-            autoStartOnNextShow = true;
         }
     }
 

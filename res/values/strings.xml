@@ -17,6 +17,10 @@
     <string name="status_ready">Ready</string>
     <string name="status_error">Error</string>
     
+    <string name="section_settings">Settings</string>
+    <string name="setting_auto_record">Auto-start recording</string>
+    <string name="setting_auto_record_desc">Automatically begin recording when the keyboard opens</string>
+
     <string name="perm_mic_title">Microphone Access</string>
     <string name="perm_mic_desc">Required for voice recognition.</string>
     <string name="btn_grant">Grant Permission</string>
