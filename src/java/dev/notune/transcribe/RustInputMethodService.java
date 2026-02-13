@@ -14,6 +14,8 @@ import android.util.Log;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.view.MotionEvent;
+import android.view.inputmethod.EditorInfo;
+import java.io.File;
 
 public class RustInputMethodService extends InputMethodService {
     
@@ -40,8 +42,8 @@ public class RustInputMethodService extends InputMethodService {
     private View switchKeyboardButton;
     private Handler mainHandler;
     private boolean isRecording = false;
+    private boolean pendingSwitchBack = false;
     private String lastStatus = "Initializing...";
-
     // Key repeat settings
     private static final long REPEAT_INITIAL_DELAY = 400; // ms before repeat starts
     private static final long REPEAT_INTERVAL = 50; // ms between repeats
@@ -85,7 +87,13 @@ public class RustInputMethodService extends InputMethodService {
             switchKeyboardButton = view.findViewById(R.id.ime_switch_keyboard);
 
             switchKeyboardButton.setOnClickListener(v -> {
-                switchToPreviousInputMethod();
+                if (isRecording) {
+                    pendingSwitchBack = true;
+                    stopRecording();
+                    updateRecordButtonUI(false);
+                } else {
+                    switchToPreviousInputMethod();
+                }
             });
 
             // Key repeat runnable for backspace
@@ -198,7 +206,19 @@ public class RustInputMethodService extends InputMethodService {
             return errorView;
         }
     }
-    
+
+    @Override
+    public void onStartInputView(EditorInfo info, boolean restarting) {
+        super.onStartInputView(info, restarting);
+        if (!isRecording && new File(getFilesDir(), "auto_record").exists()) {
+            if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO)
+                    == PackageManager.PERMISSION_GRANTED) {
+                startRecording();
+                updateRecordButtonUI(true);
+            }
+        }
+    }
+
     private void updateRecordButtonUI(boolean recording) {
         isRecording = recording;
         if (recording) {
@@ -230,20 +250,34 @@ public class RustInputMethodService extends InputMethodService {
             Log.d(TAG, "Status: " + status);
             lastStatus = status;
             updateUiState();
+            if (pendingSwitchBack && status.startsWith("Error")) {
+                pendingSwitchBack = false;
+                switchToPreviousInputMethod();
+            }
         });
     }
 
     private void updateUiState() {
-        if (statusView != null) statusView.setText(lastStatus);
-
         boolean isLoading = lastStatus.contains("Loading") || lastStatus.contains("Initializing");
         boolean isWaiting = lastStatus.contains("Waiting");
         boolean isTranscribing = lastStatus.contains("Transcribing") || lastStatus.contains("Processing");
         boolean isError = lastStatus.startsWith("Error");
+        boolean isReady = lastStatus.equals("Ready");
 
-        // Show progress bar during loading or waiting for model
+        // Don't show internal loading states to the user
+        if (statusView != null && !isRecording) {
+            if (isError) {
+                statusView.setText(lastStatus);
+            } else if (isTranscribing || isWaiting) {
+                statusView.setText("Processing...");
+            } else {
+                statusView.setText("Tap to Record");
+            }
+        }
+
+        // Hide progress bar - don't expose model loading to user
         if (progressBar != null) {
-            progressBar.setVisibility(isLoading || isWaiting ? View.VISIBLE : View.GONE);
+            progressBar.setVisibility(View.GONE);
         }
 
         // Disable button only during transcription/processing/waiting or fatal errors
@@ -253,9 +287,8 @@ public class RustInputMethodService extends InputMethodService {
             recordContainer.setAlpha(disable ? 0.5f : 1.0f);
         }
 
-        // Update hint during loading to indicate recording is available
-        if (isLoading && hintView != null && !isRecording) {
-            hintView.setText("Tap to Record (model loading)");
+        if (hintView != null && !isRecording) {
+            hintView.setText("Tap to Record");
         }
     }
     
@@ -266,7 +299,11 @@ public class RustInputMethodService extends InputMethodService {
                 getCurrentInputConnection().commitText(text + " ", 1);
             }
             updateRecordButtonUI(false);
-            if (statusView != null) statusView.setText("Ready");
+            if (statusView != null) statusView.setText("Tap to Record");
+            if (pendingSwitchBack) {
+                pendingSwitchBack = false;
+                switchToPreviousInputMethod();
+            }
         });
     }
 }
