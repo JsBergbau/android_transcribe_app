@@ -73,6 +73,21 @@ public class MainActivity extends Activity {
             }
         });
 
+        Switch selectTranscriptionSwitch = findViewById(R.id.switch_select_transcription);
+        File selectTranscriptionFile = new File(getFilesDir(), "select_transcription");
+        selectTranscriptionSwitch.setChecked(selectTranscriptionFile.exists());
+        selectTranscriptionSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                try {
+                    selectTranscriptionFile.createNewFile();
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to create select_transcription file", e);
+                }
+            } else {
+                selectTranscriptionFile.delete();
+            }
+        });
+
         // Initial check
         updatePermissionUI();
         

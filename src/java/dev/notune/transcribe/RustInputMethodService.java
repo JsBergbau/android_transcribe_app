@@ -295,8 +295,22 @@ public class RustInputMethodService extends InputMethodService {
     // Called from Rust
     public void onTextTranscribed(String text) {
         mainHandler.post(() -> {
-            if (getCurrentInputConnection() != null) {
-                getCurrentInputConnection().commitText(text + " ", 1);
+            InputConnection ic = getCurrentInputConnection();
+            if (ic != null) {
+                String committed = text + " ";
+                ic.commitText(committed, 1);
+
+                if (new File(getFilesDir(), "select_transcription").exists()) {
+                    android.view.inputmethod.ExtractedText et = ic.getExtractedText(
+                        new android.view.inputmethod.ExtractedTextRequest(), 0);
+                    if (et != null) {
+                        int end = et.selectionStart;
+                        int start = end - committed.length();
+                        if (start >= 0) {
+                            ic.setSelection(start, end);
+                        }
+                    }
+                }
             }
             updateRecordButtonUI(false);
             if (statusView != null) statusView.setText("Tap to Record");
