@@ -159,18 +159,19 @@ public class RustInputMethodService extends InputMethodService {
             enterButton.setOnClickListener(v -> {
                 InputConnection ic = getCurrentInputConnection();
                 if (ic != null) {
-                    // Get the action type (Search, Send, Done, etc.)
                     android.view.inputmethod.EditorInfo editorInfo = getCurrentInputEditorInfo();
-                    int options = editorInfo.imeOptions;
-                    int action = options & android.view.inputmethod.EditorInfo.IME_MASK_ACTION;
+                    int imeOptions = editorInfo.imeOptions;
+                    int action = imeOptions & android.view.inputmethod.EditorInfo.IME_MASK_ACTION;
+                    boolean noEnterAction = (imeOptions & android.view.inputmethod.EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0;
 
-                    // Explicitely ommitting DONE.
-                    // Sending DONE just closes the keyboard, and in many applications if the ime_action is DONE
-                    // the correct behavior is to enter a new line. (E.g. messaging apps with enter-to-send disabled)
-                    if (action == android.view.inputmethod.EditorInfo.IME_ACTION_GO ||
-                        action == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH ||
-                        action == android.view.inputmethod.EditorInfo.IME_ACTION_SEND ||
-                        action == android.view.inputmethod.EditorInfo.IME_ACTION_NEXT) {
+                    // If the editor flags IME_FLAG_NO_ENTER_ACTION (e.g. multi-line fields in
+                    // messaging apps like Signal), or if there's no meaningful action, insert a
+                    // newline. Otherwise perform the editor action (Go, Search, Send, etc.).
+                    if (!noEnterAction && (
+                            action == android.view.inputmethod.EditorInfo.IME_ACTION_GO ||
+                            action == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH ||
+                            action == android.view.inputmethod.EditorInfo.IME_ACTION_SEND ||
+                            action == android.view.inputmethod.EditorInfo.IME_ACTION_NEXT)) {
                         ic.performEditorAction(action);
                     } else {
                         ic.sendKeyEvent(new android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_ENTER));
