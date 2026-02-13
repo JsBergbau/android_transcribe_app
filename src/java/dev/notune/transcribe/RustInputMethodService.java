@@ -102,7 +102,8 @@ public class RustInputMethodService extends InputMethodService {
                 public void run() {
                     InputConnection ic = getCurrentInputConnection();
                     if (ic != null) {
-                        ic.deleteSurroundingText(1, 0);
+                        ic.sendKeyEvent(new android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_DEL));
+                        ic.sendKeyEvent(new android.view.KeyEvent(android.view.KeyEvent.ACTION_UP, android.view.KeyEvent.KEYCODE_DEL));
                     }
                     mainHandler.postDelayed(this, REPEAT_INTERVAL);
                 }
@@ -125,7 +126,8 @@ public class RustInputMethodService extends InputMethodService {
                     case MotionEvent.ACTION_DOWN:
                         InputConnection ic = getCurrentInputConnection();
                         if (ic != null) {
-                            ic.deleteSurroundingText(1, 0);
+                            ic.sendKeyEvent(new android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_DEL));
+                            ic.sendKeyEvent(new android.view.KeyEvent(android.view.KeyEvent.ACTION_UP, android.view.KeyEvent.KEYCODE_DEL));
                         }
                         mainHandler.postDelayed(backspaceRepeatRunnable, REPEAT_INITIAL_DELAY);
                         return true;
