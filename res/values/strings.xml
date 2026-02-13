@@ -21,6 +21,9 @@
     <string name="setting_auto_record">Auto-start recording</string>
     <string name="setting_auto_record_desc">Automatically begin recording when the keyboard opens</string>
 
+    <string name="setting_select_transcription">Select transcription</string>
+    <string name="setting_select_transcription_desc">Highlight transcribed text so it can be deleted with a single backspace</string>
+
     <string name="perm_mic_title">Microphone Access</string>
     <string name="perm_mic_desc">Required for voice recognition.</string>
     <string name="btn_grant">Grant Permission</string>
