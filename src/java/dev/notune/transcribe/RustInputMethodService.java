@@ -323,4 +323,5 @@ public class RustInputMethodService extends InputMethodService {
             }
         });
     }
+    public void onAudioLevel(float level) { }
 }

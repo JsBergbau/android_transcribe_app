@@ -40,6 +40,21 @@
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:exported="false" />
+            
+        <!-- RecognizerIntent entry point (for SwiftKey chooser) -->
+        <activity
+            android:name=".RecognizeActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
+
+            <intent-filter>
+                <action android:name="android.speech.action.RECOGNIZE_SPEECH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
 
         <!-- Live Subtitles Service -->
         <service

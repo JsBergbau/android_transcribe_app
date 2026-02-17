@@ -3,3 +3,5 @@ pub mod assets;
 pub mod ime;
 pub mod subtitle;
 pub mod main_activity;
+pub mod voice_session;
+pub mod recognize;
