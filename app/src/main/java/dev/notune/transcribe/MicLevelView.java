@@ -20,7 +20,7 @@ public class MicLevelView extends View {
 
     private void init() {
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(0xFFFFFFFF); // weiß, Alpha setzen wir dynamisch
+        paint.setColor(0xFFFFFFFF); // white, we set the alpha dynamically
     }
 
 
@@ -36,7 +36,7 @@ public class MicLevelView extends View {
 
         if (animator != null) animator.cancel();
         animator = ValueAnimator.ofFloat(current, target);
-        animator.setDuration(60); // schnell, wirkt „live“
+        animator.setDuration(60); // fast, makes it feel "live"
         animator.addUpdateListener(a -> {
             current = (float) a.getAnimatedValue();
             invalidate();
@@ -52,17 +52,17 @@ public class MicLevelView extends View {
         float cy = getHeight() / 2f;
         float min = Math.min(getWidth(), getHeight()) / 2f;
 
-        // Radius: Grundgröße + Pegel
+        // Radius: base size + level
         float base = min * 0.42f;
         float extra = min * 0.28f * current;
         float r = base + extra;
 
-        // Innerer heller Kreis (macht Mitte heller)
+        // Inner bright circle (makes the center brighter)
         int alphaInner = (int) (50 + 90 * current);  // 50..140
         paint.setAlpha(alphaInner);
         canvas.drawCircle(cx, cy, r, paint);
 
-        // Äußerer weicher Glow (größer, transparenter)
+        // Outer soft glow (larger, more transparent)
         int alphaOuter = (int) (18 + 45 * current);  // 18..63
         paint.setAlpha(alphaOuter);
         canvas.drawCircle(cx, cy, r * 1.25f, paint);

@@ -59,8 +59,7 @@ public class RecognizeActivity extends Activity {
             }
         });
 
-        // Permission check wie bisher...
-        // initNative(this), startRecording()
+        // Permission check
 
         initNative(this);
         isRecording = true;
