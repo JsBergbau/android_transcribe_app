@@ -48,7 +48,10 @@ public class RustInputMethodService extends InputMethodService {
     private static final long REPEAT_INITIAL_DELAY = 400; // ms before repeat starts
     private static final long REPEAT_INTERVAL = 50; // ms between repeats
     private Runnable backspaceRepeatRunnable;
-    private Runnable spaceRepeatRunnable;
+    private Runnable spaceRepeatRunnable;    
+    private final AudioFocusPauser audioPauser = new AudioFocusPauser();
+    private boolean pauseAudioActive = false;
+
 
     @Override
     public void onCreate() {
@@ -193,8 +196,16 @@ public class RustInputMethodService extends InputMethodService {
 
                 if (isRecording) {
                     stopRecording();
+                    if (pauseAudioActive) {
+                        audioPauser.abandon(this);
+                        pauseAudioActive = false;
+                    }                    
                     updateRecordButtonUI(false);
                 } else {
+                    if (isPauseAudioEnabled()) {
+                        audioPauser.request(this);
+                        pauseAudioActive = true;
+                    }                    
                     startRecording();
                     updateRecordButtonUI(true);
                 }
@@ -239,6 +250,10 @@ public class RustInputMethodService extends InputMethodService {
     public void onDestroy() {
         super.onDestroy();
         cleanupNative();
+        if (pauseAudioActive) {
+            audioPauser.abandon(this);
+            pauseAudioActive = false;
+        }
     }
 
     // Native methods
@@ -257,6 +272,10 @@ public class RustInputMethodService extends InputMethodService {
                 pendingSwitchBack = false;
                 switchToPreviousInputMethod();
             }
+            if (pauseAudioActive && status != null && status.startsWith("Error")) {
+                audioPauser.abandon(this);
+                pauseAudioActive = false;
+            }            
         });
     }
 
@@ -324,4 +343,8 @@ public class RustInputMethodService extends InputMethodService {
         });
     }
     public void onAudioLevel(float level) { }
+    
+    private boolean isPauseAudioEnabled() {
+        return new File(getFilesDir(), "pause_audio").exists();
+    }
 }
