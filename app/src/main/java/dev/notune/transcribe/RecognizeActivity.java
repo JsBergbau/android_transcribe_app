@@ -32,8 +32,6 @@ public class RecognizeActivity extends Activity {
     private final AudioFocusPauser audioPauser = new AudioFocusPauser();
     private boolean pauseAudioActive = false;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +49,7 @@ public class RecognizeActivity extends Activity {
             if (pauseAudioActive) {
                 audioPauser.abandon(this);
                 pauseAudioActive = false;
-            }            
+            }
             setResult(Activity.RESULT_CANCELED);
             finish();
         });
@@ -65,7 +63,7 @@ public class RecognizeActivity extends Activity {
                 if (pauseAudioActive) {
                     audioPauser.abandon(this);
                     pauseAudioActive = false;
-                }                    
+                }
             }
         });
 
@@ -84,15 +82,15 @@ public class RecognizeActivity extends Activity {
             pauseAudioActive = true;
         }
         startRecording();
-    }    
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (pauseAudioActive) {
-                audioPauser.abandon(this);
-                pauseAudioActive = false;
-        }        
+            audioPauser.abandon(this);
+            pauseAudioActive = false;
+        }
         try { cleanupNative(); } catch (Throwable t) { /* ignore */ }
     }
 
@@ -110,7 +108,6 @@ public class RecognizeActivity extends Activity {
         runOnUiThread(() -> status.setText(shown));
     }
 
-    
     // Called from Rust with 0..1
     public void onAudioLevel(float level) {
         runOnUiThread(() -> micLevel.setLevel(level));
@@ -129,11 +126,11 @@ public class RecognizeActivity extends Activity {
             finish();
         });
     }
-    
+
     private boolean isPauseAudioEnabled() {
         return new java.io.File(getFilesDir(), "pause_audio").exists();
     }
-    
+
     // Native methods
     private native void initNative(RecognizeActivity activity);
     private native void cleanupNative();

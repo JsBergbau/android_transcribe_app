@@ -87,7 +87,7 @@ public class MainActivity extends Activity {
                 selectTranscriptionFile.delete();
             }
         });
-        
+
         Switch pauseAudioSwitch = findViewById(R.id.switch_pause_audio);
         File pauseAudioFile = new File(getFilesDir(), "pause_audio");
         pauseAudioSwitch.setChecked(pauseAudioFile.exists());
@@ -102,7 +102,6 @@ public class MainActivity extends Activity {
                 pauseAudioFile.delete();
             }
         });
-        
 
         // Initial check
         updatePermissionUI();

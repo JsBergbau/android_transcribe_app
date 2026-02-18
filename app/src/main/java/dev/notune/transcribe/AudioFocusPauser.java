@@ -26,7 +26,7 @@ public class AudioFocusPauser {
                 // Pre-O: best effort
                 am.requestAudioFocus(listener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
             }
-        } catch (Throwable ignored) { }
+        } catch (Exception ignored) { }
     }
 
     public void abandon(Context ctx) {
@@ -42,6 +42,6 @@ public class AudioFocusPauser {
             } else {
                 am.abandonAudioFocus(listener);
             }
-        } catch (Throwable ignored) { }
+        } catch (Exception ignored) { }
     }
 }
